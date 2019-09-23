@@ -1,0 +1,36 @@
+i.springDatajpa，jpa规范，hibernate三者之间的关系
+		code  -- > springDatajpa  --> jpa规范的API --> hibernate
+ii.符合springDataJpa规范的dao层接口的编写规则
+		1.需要实现两个接口（JpaRepository，JapSpecificationExecutor）
+		2.提供响应的泛型
+iii.运行过程
+		* 动态代理的方式：动态代理对象
+iiii.查询
+
+spring data jpa 是对jpa的进一步加强
+jpa需要创建META-INF/persistence.xml并进行相关的配置，
+但spring data jpa所有的配置信息都放到applicationContext.xml标准的spring配置文件中；
+以下是所有配置相关流程：
+
+<!--整合spring dataJpa-->
+    <jpa:repositories base-package="cn.itcast.dao" transaction-manager-ref="transactionManager"
+                   entity-manager-factory-ref="entityManagerFactoty" ></jpa:repositories>
+	根据上面spring配置信息，我们需要：
+		1、实体管理工厂
+		2、事务管理
+		3、指定哪些包是dao（具体操作方法）
+	
+实体管理工厂：创建entityManagerFactory对象交给spring容器管理（对比jpa，你就会明白所有操作数据库方法其实都在这个类）
+    <bean id="entityManagerFactoty" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
+    还需要该类中配置如下信息：
+    	1、数据原
+    	2、配置的扫描的包（实体类所在的包）
+    	3、jpa的实现厂家
+    	4、jpa的供应商适配器，包括：配置是否自动创建数据库表、指定数据库（mysql oracle）、数据库方言、是否显示sql
+    	等
+    	
+事务管理：哪些包下的类，哪些方法需要进行事务管理
+
+配置包扫描：<context:component-scan base-package="cn.itcast" ></context:component-scan>
+
+    
