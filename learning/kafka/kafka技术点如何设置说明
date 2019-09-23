@@ -111,3 +111,13 @@ API 生产者 发送 流程
 	网上说：单个分区 是有序的 ，多个分区 无序，但是在 生产者 api 中，是有重试机制的并且是异步发送给kafka服务器的，就算是单分区也不一定是有序，如果
 		一定要有序，见：com.khm.kafka.producer 第 42行
 
+自定义拦截器
+	1、实现 ProducerInterceptor 接口
+	2、在 生产者的配置类中 添加 拦截器
+		List<String> interceptors = new ArrayList<>();
+		interceptors.add("huxi.test.producer.TimeStampPrependerInterceptor"); // interceptor 1
+		interceptors.add("huxi.test.producer.CounterInterceptor"); // interceptor 2
+		props.put(ProducerConfig.INTERCEPTOR_CLASSES_CONFIG, interceptors); 
+		
+Kafka案例_监控Eagle的安装
+
