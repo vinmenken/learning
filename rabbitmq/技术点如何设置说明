@@ -1,0 +1,37 @@
+消息持久化：
+	注意：已经定义好的 非持久化 消息队列 是不可以修改为 持久化 的。
+	channel.queueDeclare("消息队列名字", 是否持久化，false，false，null);
+	
+订阅模型：见 各种模型图 的 publish/subscribe  (在交换机中设置为：fanout)
+	一个生产者，多个消费者
+	每一个消费者都有自己的队列
+	生产者 直接把消息 发送 到 交换机，由交换机把消息发送到每个消费者的队列中
+	每个队列都绑定到 交换机 上
+	注意：如果这个时候没有 队列绑定到 交换机 而交换机收到的消息 会丢失
+	
+Routing 路由模型，在 订阅模型 中增加 路由key 则可 （在交换机中设置为：Disrect）
+	只需要在生产者（send）中 发送消息时 带上 routingKey路由key 则可
+	同样在消费都(recv) 中 也绑定 相对应的routingKey 则可
+	
+Topic 模型：支持通配符的一种路由模型 （在交换机中设置为：topic） 
+	与routing 路由模型一样的设置，只是 routingKey的key 可以写成这样：error.order 、error.*、error.#
+	*:匹配一个
+	#：匹配多个
+	
+	send方：写具体的 routingKey 如：error.order、error.po
+	recv方：具体想匹配的 routingKey 如：error.*、error.#
+
+消息确认机制：
+	从生产者发消息到消息队列的角度分：
+		1、AMQP事务机制 ：见 tx包中 send.java ：降低了吞吐量
+			txSelect、txCommit、txRollback
+		
+		2、confirm机制 :
+			单条、批量 确认 见：confirm包中 Send.java
+			异步 确认 见 ：confirm包中 Send1.java
+		
+	从客户端与服务关系分：
+		1、生产者：
+		
+		2、消费者：
+	
