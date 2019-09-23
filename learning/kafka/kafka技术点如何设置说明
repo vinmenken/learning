@@ -1,0 +1,113 @@
+kafka 
+1、是一个消息队列服务器
+2、技术名词：
+	broker：指 一个kafka消息队列服务器
+	topic：每一个消息都有的类别（消息标记）
+	partition分区：每一个topic都包含有一个或多个分区
+	producer：消息生产者
+	consumer: 消费者
+	consumer group: 消费者组
+	
+3、增删查 topic（相当于创建队列/存储地方）
+	说明：--replication-factor参数：指为分区创建副本数，这个副本分区不能与主分区同时存在于同一broker中，原因：保证主分区岩机后，其它broker上的副本分区能恢复主分区
+	增：
+	bin/kafka-topics.sh --create --zookeeper localhost:2181 --replication-factor 1 --partitions 1 --topic test
+	查：
+	bin/kafka-topics.sh --list --zookeeper localhost:2181
+	bin/kafka-topics.sh --describe --zookeeper localhost:2181
+	删：
+	bin/kafka-topics.sh --delete --zookeeper localhost:2181 --topic test
+	
+4、生产者 向 kafka 发消息
+	bin/kafka-console-producer.sh --broker-list localhost:9092 --topic test
+	
+5、消费者 从 kafka 获取 消息
+	老：
+	bin/kafka-console-consumer.sh --zookeeper localhost:2181 --topic test --from-beginning
+	新：
+	bin/kafka-console-consumer.sh --bootstrap-server localhost:9092 --topic test --from-beginning
+	
+消息的存储方式：
+	我们可以在数据文件发现，是以分区文件夹来存储消息的；
+	分区文件夹中有 index索引文件 、消息存储文件；
+	1|0    ----》 msg01
+	2|330  ----》 msg02
+	索引号 加 偏移量 来定来到 消息存储文件 中 消息的具体位置
+
+生产者 发送 消息 到kafka 的分区 策略
+	生产者 指定分区号 来存储 消息
+	生产者 指定key 来存储 消息，这时kafka会把key进行hash 再 取余 来得到 分区号
+	生产者 什么都没有指定，kafka会随机生成一个数 再与 分区总数据 取 余 来得到 分区号 （round-robin）
+	
+生产者 发送 消息 到kafka 是如何保证 kafka已经接收到 （数据可靠性保证）
+    ISR：解决了从分区岩机后，生产者没法收到ack问题
+	主分区 同步 消息到 从分区 ：kafka所有从分区都同步消息后，才发送 ack 给 生产者
+	当某部分从分区岩机后，这个时候就没有满足上面的所有从分区都同步消息后才发送ack，这个时候引入ISR集合
+	ISR集合：主分区与从分区同步消息会记录一个时间，如果该时间超出了设定的阀值（replica.lag.time.max.ms）,就会把这个从分区踢出这个ISR集合
+	当主分区岩机后，kafka只会从这个ISR集合中选一个从分区做主分区
+	ACKS参数：
+	0：生产者不等待broker反回ack
+	1：生产者等待broker反回ack，只要主分区收到消息就返回ack，而不需要所有从分区都同步后（ack还没返回给生产者，主分区已经岩机了，这个时候消息可能会丢失，因为从分区还没同步就变成主分区了）
+	-1（all）：生产者不等待broker反回ack，所有从分区与主分区同步后（ack还没返回给生产者，主分区岩机，从分区变成主分区，这个时候生产者再发送多一次消息（因为上一次没有收到ack），这个时候主分区已经有重复的消息）
+	
+	消息重复问题解决方法:
+		当ACKS参数设为 -1 时，消息 传到 kafka是 保证到达的，但是消息有可能出现重复
+		这个时候就有了 ExactlyOnce ,它是 acks=-1 与 幂等性（0.11版本后有） 相作用来解决这个问题
+		开启方法：
+			只需要在 生产者producer 将参数 enable.idompotence 设置为 true 则开启 幂等性 
+		原理：
+			生产者 在初始化的时候 会分配到一个pid（与session id相类似）
+			发往同一个分区的消息会附带一个Sequeue Num
+			broker 只会持久化一次 相同主键的消息
+			注意：
+				生产者 岩机 或重新连接 broker 是会得到一个新的pid
+	
+消费者
+	数据一至性问题：就是说 主分区与从分区会出现数据同步不一至问题，有可能某一些从分区比另外一些从分区的消息多，所以我们需要保证 给消费者看到的是一至的消息所以要设置以下两个参数
+		HW:指的是消费者能见到的最大offset，ISR集合中最小的LEO
+		LEO:每个副本最大的offset
+	消费方式：pull（消费者拉消息）、 push（生产者推消息）
+		pull 拉 ：当broker没有新消息的时候，我们可以设置timeout 等待指定的时间 后再返回，防止消费者过于频繁地向brokern发起拉数据的请求（没用的请求）		
+	消费者分区分配策略：
+		Range 策略 是相对于每个主题 的分区 来分配给消费者
+			分区 topic1：t11 t12 t13 t14 t15, topic2: t21 t22 t23 t24 t25
+			c1:t11 t12 t13     |t21 t22 t23
+			c2:t14             |t24
+			c3:t15             |t25
+			
+		RoundRobin 策略 是把所有订阅主题的分区合并，再依次按顺序分配给消费者：
+			分区 topic1：t11 t12 t13 , topic2: t21 t22 t23
+			c1：t11 t22
+		    c2: t21 t13
+		    c3: t12 t23
+	消费者组：没有指定消费者组，kafka会为其默认创建一个	   
+		   
+	消费者offset：
+		offset：消费者 消费 消息的进度/位置
+		这个位置保存在 zookeeper / 本地kafka服务器中（内置的一个topic：__consumer_offsets）
+		它是安照：消费组、topic、分区 来确定offset
+	
+kafka高效读写的原因：顺序写磁盘（速度非常快）
+kafka是一个分布系统把有会有一个头负责管理（controller），谁来做这个头，只要broker谁在zookeeper抢到（写到这个字段）谁就是头
+
+事务：
+	produce事务：生产者有精准一次性，但是这个功能只能在一个会话中，因为每一次生产者与kafka连接后会重新得到一个pid
+		当我一个生产者同时向不同的分区写消息事，第一个分区写了10条消息
+		第二个分区也写了10条消息
+		第三个分区还没写，生产者就岩机了
+		导致整个业务数据不一至，当生产者重启后，第一第二分区的消息已经在kafka了，但是 因为pid已经改变了，消息会重发到
+		一二分区中，导致消息重复。
+		因此这里引入了：transaction id，这个transaction id 与pid进行绑定，这样生产者重启后也能通过 transaction id
+		来获得原有的pid，使进行中的事务得到恢复。
+		
+API 生产者 发送 流程
+	1、有两个线程 main线程 和 sender线程
+	2、发送 消息是异步的
+	3、main线程 调用 send（）方法-》interceptors(拦截器)->serializer（序列化）->partitioner（分区器：指定分配到哪一个分区）
+	4、send方法把消息 送到 recordAccumulator 变量 存储消息
+	5、sender线程不断的从 recordAccumulator 变量中 拉取消息发送到kafka broker
+	
+注意：
+	网上说：单个分区 是有序的 ，多个分区 无序，但是在 生产者 api 中，是有重试机制的并且是异步发送给kafka服务器的，就算是单分区也不一定是有序，如果
+		一定要有序，见：com.khm.kafka.producer 第 42行
+
