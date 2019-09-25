@@ -2,7 +2,7 @@
 - 1、创建一个接口，抽象出方法；
 - 2、实现该接口
 - 3、通过上下文类（context）来使用某一种策略
-具体例代码见(https://www.runoob.com/design-pattern/strategy-pattern.html)
+具体例[代码](https://www.runoob.com/design-pattern/strategy-pattern.html)
 ```
 public class Context {
    private Strategy strategy; //策略接口
