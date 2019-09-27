@@ -31,3 +31,17 @@ public class StrategyPatternDemo {
    }
 }
 ```
+
+#### 2、观察者模式：对象间存在一对多关系；一个对象有信息需要通知其它对象
+##### java有内置的观察者类 只需要 继承 Observable类 就会有 注册、移除、通知方法
+- 1、将需要通知的所有对象，抽象成一个接口（Observer），接口中的方法就是被通知对象需要知道的方法
+- 2、实现该接口
+- 3、创建Subject类，添加 实现类对象(Observer)
+- 4、当subject对象有消息要知道Observer对象时，通过for 来调用 Observer的方法
+```
+public interface Subject { // Observable类
+    public void registerObserver(Observer observer); //注册
+    public void removeObserver(Observer observer); //移除
+    public void notifyObservers(); //通知
+}
+```
