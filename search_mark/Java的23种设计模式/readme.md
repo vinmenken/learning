@@ -45,3 +45,7 @@ public interface Subject { // Observable类
     public void notifyObservers(); //通知
 }
 ```
+
+#### 3、原型模型：简单说就是把对象复制
+- 1、如果必须要频繁new对象，可以考虑原型模型，提高性能
+- 2、一般和工厂模式一起使用，原因与1一样
