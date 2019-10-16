@@ -49,3 +49,58 @@ public interface Subject { // Observable类
 #### 3、原型模型：简单说就是把对象复制
 - 1、如果必须要频繁new对象，可以考虑原型模型，提高性能
 - 2、一般和工厂模式一起使用，原因与1一样
+
+#### 4、适配器模型：将传入的对象，实现接口方法
+- 1、确定需要适配的接口
+- 2、通过构造函数传入 需要适配的对象
+- 3、实现该接口（依赖传入的对象）
+```
+public class EnumerationIterator implements Iterator<Object> {
+    private Enumeration enumeration;
+    public EnumerationIterator(Enumeration enumeration){
+        this.enumeration = enumeration;
+    }
+    public boolean hasNext() {
+        return enumeration.hasMoreElements();
+    }
+
+    public Object next() {
+        return enumeration.nextElement();
+    }
+
+    public void remove() {
+        throw new UnsupportedOperationException();
+    }
+}
+```
+```
+public class TurkeyAdapter implements Duck {
+    private Turkey turkey;
+    public TurkeyAdapter(Turkey turkey){
+        this.turkey = turkey;
+    }
+    public void quack() {
+        turkey.gobble();
+    }
+
+    public void fly() {
+        for (int i=0; i<6; i++){
+            turkey.fly();
+        }
+    }
+}
+```
+```
+public class TurkeyAdapter2 extends WildTurkey implements Duck {
+    public void quack() {
+        super.gobble();
+    }
+
+    @Override
+    public void fly() {
+        super.fly();
+        super.fly();
+        super.fly();
+    }
+}
+```
