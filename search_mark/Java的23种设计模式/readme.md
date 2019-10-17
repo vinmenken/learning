@@ -129,5 +129,29 @@ public interface Criteria {
 }
 ```
 
-#### 7、组合模式：
+#### 7、组合模式：员工对象有一个集合变量，用来保存员工；ceo直接下属：销售经理和开发经理；销售经理直接下属：销售1、销售2；开发经理直接下属：开发员1、开发员2；
+```
+public class Employee {
+   private String name;
+   private String dept;
+   private int salary;
+   private List<Employee> subordinates;
+```
+```
+public static void main(String[] args) {
+      Employee CEO = new Employee("John","CEO", 30000);
+ 
+      Employee headSales = new Employee("Robert","Head Sales", 20000);
+ 
+      Employee headMarketing = new Employee("Michel","Head Marketing", 20000);
+ 
+      Employee clerk1 = new Employee("Laura","Marketing", 10000);
+      Employee clerk2 = new Employee("Bob","Marketing", 10000);
+ 
+      Employee salesExecutive1 = new Employee("Richard","Sales", 10000);
+      Employee salesExecutive2 = new Employee("Rob","Sales", 10000);
+ 
+      CEO.add(headSales);
+      CEO.add(headMarketing);
+```
 
