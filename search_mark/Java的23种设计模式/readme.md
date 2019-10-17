@@ -104,3 +104,5 @@ public class TurkeyAdapter2 extends WildTurkey implements Duck {
     }
 }
 ```
+
+#### 5、桥接模型：一个房子里面有客厅、房间，一个接口，一个抽象类，
