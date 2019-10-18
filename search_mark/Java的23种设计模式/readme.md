@@ -202,5 +202,6 @@ public class HomeTheaterFacade {
     }
 ```
 
-      Employee clerk2 = new Employee("Bob","Marketing", 10000);供
-      Employee clerk2 = new Employee("Bob","Marketing", 10000);
+#### 9、享元模式：减少创建重复对象数，通常这些对象都是一些简单，只需要改变部份变量，所以我们可以创建一个这样的简单对象，之后通过修改变量来达到目得；如我们需要在屏幕上画小草数量（坐标定位xy、色）非常多，就能用到这种模式
+- 1、注意：这种模式不能用在多线程中，不安全
+
