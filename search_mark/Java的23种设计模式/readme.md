@@ -155,3 +155,52 @@ public static void main(String[] args) {
       CEO.add(headMarketing);
 ```
 
+#### 8、外观模式：隐藏系统的复杂性，提供简单的方法；如：回到家我想听音乐，但我需要开音箱、cd机、功放，这些操作太过多了，我现在想只需要按一个按钮就能把上面所有的设备启动；这就是外观模式了
+```
+public class MainTest {
+    public static void main(String[] args) {
+        HomeTheaterFacade homeTheaterFacade = new HomeTheaterFacade();
+        homeTheaterFacade.ready();
+        homeTheaterFacade.play();
+    }
+}
+```
+```
+public class HomeTheaterFacade {
+    private TheaterLights theaterLights;
+    private Popcorn popcorn;
+    private Stereo stereo;
+    private Projector projector;
+    private Screen screen;
+    private DvdPlayer dvdPlayer;
+    public HomeTheaterFacade(){
+        theaterLights = TheaterLights.getInstance();
+        popcorn = Popcorn.getInstance();
+        stereo = Stereo.getInstance();
+        projector = Projector.getInstance();
+        screen = Screen.getInstance();
+        dvdPlayer = DvdPlayer.getInstance();
+    }
+    public void ready(){
+        popcorn.on();
+        popcorn.pop();
+        screen.down();
+        projector.on();
+        stereo.on();
+        dvdPlayer.on();
+        dvdPlayer.setDvd();
+        theaterLights.dim(10);
+    }
+    public void end(){
+        popcorn.off();
+        theaterLights.bright();
+        screen.up();
+        projector.off();
+        stereo.off();
+        dvdPlayer.setDvd();
+        dvdPlayer.off();
+    }
+```
+
+      Employee clerk2 = new Employee("Bob","Marketing", 10000);供
+      Employee clerk2 = new Employee("Bob","Marketing", 10000);
