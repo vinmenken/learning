@@ -325,6 +325,7 @@ public class LightOnCommand implements Command {
     }
 }
 ```
+```
 public class ControlTest {
     public static void main(String[] args) {
         CommandModeControl control = new CommandModeControl();//控制类
@@ -368,4 +369,4 @@ public class ControlTest {
         control.offButton(4);
     }
 }
-
+```
