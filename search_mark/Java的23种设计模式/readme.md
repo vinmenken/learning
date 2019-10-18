@@ -276,3 +276,96 @@ public class MainTest {
 }
 ```
 
+#### 11、命令模式：数据驱动的设计模式、每一个命令都有一个类实现命令接口、如：我们家里有没个区域都有灯：客厅灯、房间灯，但每一个灯功能都不一样：如客厅的灯不单指能开关，还有调节亮度；房间的灯有暖色和冷色，最后我们可以通过一个控制器来操作；
+- 1、创建命令接口：把这些灯的操作抽象成接口，只有开和关方法
+- 2、实现命令接口：通过传入实际执行对象（灯的驱动）来实现接口命令方法（执行方法），每一个命令创建一个专用的类
+- 3、通过一个控制类来控制所有灯的开关、控制亮度等
+```
+public interface Command {
+    /**
+     * 执行命令
+     */
+    public void execute();
+
+    /**
+     * 命令回退
+     */
+    public void undo();
+}
+```
+```
+//灯关的实现类
+public class LightOffCommand implements Command {
+    private Light light;
+    public LightOffCommand(Light light){
+        this.light = light;
+    }
+    public void execute() {
+        light.off();
+    }
+
+    public void undo() {
+        light.on();
+    }
+}
+```
+```
+//灯开的实现类
+public class LightOnCommand implements Command {
+    private Light light;
+    public LightOnCommand(Light light){
+        this.light = light;
+    }
+    public void execute() {
+        light.on();
+    }
+
+    public void undo() {
+        light.off();
+    }
+}
+```
+public class ControlTest {
+    public static void main(String[] args) {
+        CommandModeControl control = new CommandModeControl();//控制类
+        MarcoCommand onMarco, offMarco; 
+        Light bedroomLight = new Light("BedRoom"); //灯的驱动
+        Light kitchenLight = new Light("Kitchen"); //灯的驱动
+        Stereo stereo = new Stereo(); //音响的驱动
+
+        LightOnCommand bedroomLightOn = new LightOnCommand(bedroomLight); //灯的每一个命令都是一个对象
+        LightOffCommand bedroomLightOff = new LightOffCommand(bedroomLight); //灯的每一个命令都是一个对象
+        LightOnCommand kitchenLightOn = new LightOnCommand(kitchenLight); //灯的每一个命令都是一个对象
+        LightOffCommand kitchenLightOff = new LightOffCommand(kitchenLight); //灯的每一个命令都是一个对象
+
+        Command[] onCommands = {bedroomLightOn, kitchenLightOn}; //所有灯的开
+        Command[] offCommands = {bedroomLightOff, kitchenLightOff}; //所有灯的关
+        onMarco = new MarcoCommand(onCommands); 
+        offMarco = new MarcoCommand(offCommands);
+
+        StereoOnCommand stereo1On = new StereoOnCommand(stereo); //音响的每一个命令都是一个对象
+        StereoOffCommand stereo1Off = new StereoOffCommand(stereo); //音响的每一个命令都是一个对象
+        StereoAddVolCommand stereoAddVol = new StereoAddVolCommand(stereo); //音响的每一个命令都是一个对象
+        StereoSubVolCommand stereoSubVol = new StereoSubVolCommand(stereo); //音响的每一个命令都是一个对象
+
+        control.setCommand(0, bedroomLightOn, bedroomLightOff); //每个按钮都有不一样的命令
+        control.setCommand(1, kitchenLightOn, kitchenLightOff);
+        control.setCommand(2, stereo1On, stereo1Off);
+        control.setCommand(3, stereoAddVol, stereoSubVol);
+        control.setCommand(4, onMarco, offMarco);
+
+        control.onButton(0);
+        control.undoButton();
+        control.onButton(1);
+        control.offButton(1);
+        control.onButton(2);
+        control.onButton(3);
+        control.offButton(3);
+        control.undoButton();
+        control.offButton(2);
+        control.undoButton();
+        control.onButton(4);
+        control.offButton(4);
+    }
+}
+
