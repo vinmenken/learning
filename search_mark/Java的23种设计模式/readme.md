@@ -370,3 +370,5 @@ public class ControlTest {
     }
 }
 ```
+
+#### 12、解释器模式：用的很少
