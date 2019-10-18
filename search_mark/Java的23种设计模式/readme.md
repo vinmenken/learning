@@ -205,3 +205,74 @@ public class HomeTheaterFacade {
 #### 9、享元模式：减少创建重复对象数，通常这些对象都是一些简单，只需要改变部份变量，所以我们可以创建一个这样的简单对象，之后通过修改变量来达到目得；如我们需要在屏幕上画小草数量（坐标定位xy、色）非常多，就能用到这种模式
 - 1、注意：这种模式不能用在多线程中，不安全
 
+#### 10、责任链模式:一个费用申请的审批流程，费用的多少是确定审批人是谁的唯一条件；
+- 1、创建一个抽象类（审批人），抽象方法：设置下一个审批人方法、处理方法
+- 2、实现抽象类（具体审批人）
+```
+public abstract class AbstractApprover {
+    AbstractApprover successor;
+    String name;
+    AbstractApprover(String name){
+        this.name = name;
+    }
+
+    /**
+     * 处理请求
+     * @param request 请求
+     */
+    public abstract void processRequest(PurchaseRequest request);
+    public void setSuccessor(AbstractApprover successor){
+        this.successor = successor;
+    }
+}
+```
+```
+public class DepartmentApprover extends AbstractApprover {
+    public DepartmentApprover(String name){
+        super(name + " DepartmentLeader");
+    }
+    @Override
+    public void processRequest(PurchaseRequest request) {
+        if ((5000<= request.getSum()) && (request.getSum() < 10000)){
+            System.out.println("**This request " + request.getID() + " will be handled by " + this.name + " **");
+        }else {
+            successor.processRequest(request);
+        }
+    }
+}
+```
+```
+public class GroupApprover extends AbstractApprover {
+    public GroupApprover(String name){
+        super(name + " GroupLeader");
+    }
+    @Override
+    public void processRequest(PurchaseRequest request) {
+        if (request.getSum() < 5000){
+            System.out.println("**This request " + request.getID() + " will be handled by " + this.name + " **");
+        }else {
+            successor.processRequest(request);
+        }
+    }
+}
+```
+```
+public class MainTest {
+    public static void main(String[] args) {
+        Client client = new Client();
+        AbstractApprover groupLeader = new GroupApprover("Tom");
+        AbstractApprover departmentLeader = new DepartmentApprover("Jerry");
+        AbstractApprover vicePresident = new VicePresidentApprover("Kate");
+        AbstractApprover president = new PresidentApprover("Bush");
+        groupLeader.setSuccessor(departmentLeader);
+        departmentLeader.setSuccessor(vicePresident);
+        vicePresident.setSuccessor(president);
+        president.setSuccessor(groupLeader);
+        groupLeader.processRequest(client.sendRequest(1, 100, 40));
+        groupLeader.processRequest(client.sendRequest(2, 200, 40));
+        groupLeader.processRequest(client.sendRequest(3, 300, 40));
+        groupLeader.processRequest(client.sendRequest(4, 400, 140));
+    }
+}
+```
+
