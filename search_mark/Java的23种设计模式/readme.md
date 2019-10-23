@@ -736,3 +736,4 @@ public abstract class Game {
 }
 ```
 
+#### 19、访问者模式：
