@@ -497,3 +497,94 @@ public class Alarm extends AbstractColleague {
     }
 }
 ```
+
+#### 15、备忘录模式：保存对象状态
+- 1、创建一个接口类MementoIF，为空，不需要有方法
+- 2、在对象中 添加内部类Memento实现上面的接口（定义为私有）
+- 3、创建MementoCaretaker类，用于状态的保存与还原（只是记录状态保存的路径，具体保存到哪里由对象本身实现（内部类Memento））
+```
+public class MainTest {
+    public static void main(String[] args) {
+        MementoCaretaker mementoCaretaker = new MementoCaretaker(); //管理对象状态类
+        Originator originator = new Originator(); 
+        Originator2 originator2 = new Originator2();
+        System.out.println("***Originator***");
+        originator.testState1();
+        mementoCaretaker.saveMemento("Originator", originator.createMemento());
+        originator.showState();
+        originator.testState2();
+        originator.showState();
+        originator.restoreMemento(mementoCaretaker.retrieveMemento("Originator"));
+        originator.showState();
+
+        System.out.println("***Originator2***");
+        originator2.testState1();
+        originator2.showState();
+        mementoCaretaker.saveMemento("Originator2", originator2.createMemento());
+        originator2.testState2();
+        originator2.showState();
+        originator2.restoreMemento(mementoCaretaker.retrieveMemento("Originator2"));
+        originator2.showState();
+
+        System.out.println("***Originator&&Originator2***");
+//        originator.restoreMemento(mementoCaretaker.retrieveMemento("Originator2"));
+//        originator.showState();
+    }
+}
+///////////////////////
+public class MementoCaretaker {
+    private HashMap<String, MementoIF> mementoMap;
+    public MementoCaretaker(){
+        mementoMap = new HashMap<String, MementoIF>();
+    }
+    public MementoIF retrieveMemento(String name){ //还原状态
+        return mementoMap.get(name);
+    }
+    public void saveMemento(String name, MementoIF memento){ //保存状态对象方法
+        this.mementoMap.put(name, memento);
+    }
+}
+///////////////////////
+interface MementoIF { //接口类 为空
+}
+///////////////////////
+public class Originator {
+    private HashMap<String, String> state;
+    public Originator(){
+        state = new HashMap<String, String>();
+    }
+    public MementoIF createMemento(){
+        return new Memento(state);
+    }
+    public void restoreMemento(MementoIF memento){
+        state = ((Memento) memento).getState();
+    }
+    public void showState(){
+        System.out.println("now state:" + state.toString());
+    }
+    public void testState1(){
+        state.put("blood", "500");
+        state.put("progress", "gate1 end");
+        state.put("enemy", "5");
+    }
+    public void testState2(){
+        state.put("blood", "450");
+        state.put("progress", "gate3 start");
+        state.put("enemy", "3");
+    }
+    private class Memento implements MementoIF{ //内部类
+        private HashMap<String, String> state;
+        private Memento(HashMap state){
+            this.state = new HashMap<String, String>(state);
+        }
+        private HashMap getState(){
+            return state;
+        }
+        private void setState(HashMap state){
+            this.state = state;
+        }
+    }
+}
+
+```
+
