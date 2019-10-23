@@ -432,3 +432,68 @@ public class IteratorPatternDemo {
    }
 }
 ```
+
+#### 14、中介者模式：有几个不同的对象A B C D 当某一个对象A发生了操作后，其余几个对象都会有相应不同的操作，如果这个时候每个类都写相应操作的业务逻辑，关联性非常常高，解决方法，通过一个中间类，把所有对象都注册到该对象中（把中间对象给到 其它对象中的变量），当某一对象发生操作后直接通知其它对象；
+```
+public class MainTest {
+    public static void main(String[] args) {
+        Mediator mediator = new ConcreteMediator(); //中间类
+        Alarm alarm = new Alarm(mediator, "alarm"); //在创建对象时把 中间对象 赋值给这个alarm 并 调用中间对象把这个alarm对象注册到中间对象中
+        CoffeeMachine coffeeMachine = new CoffeeMachine(mediator, "coffeeMachine"); //同上
+        Curtains curtains = new Curtains(mediator, "curtains"); //同上
+        TV tv = new TV(mediator, "tv"); //同上
+        alarm.sendMessage(0);
+        coffeeMachine.finishCoffee();
+        alarm.sendMessage(1);
+    }
+}
+/////////////////////////
+public interface Mediator {
+    /**
+     * 注册
+     * @param colleagueName 名字
+     * @param colleague 类型
+     */
+    public abstract void register(String colleagueName, AbstractColleague colleague);
+
+    /**
+     * 得到消息
+     * @param stateChange 状态
+     * @param colleagueName 名字
+     */
+    public abstract void getMessage(int stateChange, String colleagueName);
+    public abstract void sendMessage();
+}
+/////////////////////////
+public abstract class AbstractColleague {
+    private Mediator mediator;
+    public String name;
+    AbstractColleague(Mediator mediator, String name){
+        this.mediator = mediator;
+        this.name = name;
+    }
+    Mediator getMediator(){
+        return this.mediator;
+    }
+
+    /**
+     * 发送消息
+     * @param stateChange 状态
+     */
+    public abstract void sendMessage(int stateChange);
+}
+/////////////////////////
+public class Alarm extends AbstractColleague {
+    public Alarm(Mediator mediator, String name){
+        super(mediator, name);
+        mediator.register(name, this);
+    }
+    public void sendAlarm(int stateChange){
+        sendMessage(stateChange);
+    }
+    @Override
+    public void sendMessage(int stateChange) {
+        this.getMediator().getMessage(stateChange, this.name);
+    }
+}
+```
