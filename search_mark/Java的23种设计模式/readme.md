@@ -711,3 +711,28 @@ public class OnReadyState implements State{
     }
 }
 ```
+
+#### 17、空对象模式:实现了抽象类或接口的类，他也是一个对对象，只不过该对象没有实际操作意意（说白了就是不干活）
+
+#### 18、空对象模式：重点就是 抽象类，该类已经写好第一步调用的方法，我们只需要实现就可以按一定的套路走了
+```
+public abstract class Game {
+   abstract void initialize();
+   abstract void startPlay();
+   abstract void endPlay();
+ 
+   //模板
+   public final void play(){
+ 
+      //初始化游戏
+      initialize();
+ 
+      //开始游戏
+      startPlay();
+ 
+      //结束游戏
+      endPlay();
+   }
+}
+```
+
