@@ -499,7 +499,7 @@ public class Alarm extends AbstractColleague {
 ```
 
 #### 15、备忘录模式：保存对象状态
-- 1、创建一个接口类MementoIF，为空，不需要有方法
+- 1、创建一个接口类MementoIF，为空，不需要有方法；因为具本保存与还原只需要本对象知道就可以，其它人不需要理会
 - 2、在对象中 添加内部类Memento实现上面的接口（定义为私有）
 - 3、创建MementoCaretaker类，用于状态的保存与还原（只是记录状态保存的路径，具体保存到哪里由对象本身实现（内部类Memento））
 ```
@@ -588,3 +588,126 @@ public class Originator {
 
 ```
 
+#### 16、状态模式:行为随状态改变而改变的场景。 条件、分支语句的代替者
+##### 当对象的状态发生变化后，相应的操作也会有变化。如：糖果机，当你投钱后，相应的 退回硬币 、转摇杆 的操作也是有效的可操作的；但当你的状态为 售卖完了，相应的 转摇杆 操作就没有效了不能用了；
+- 1、把状态抽象一个状态接口：
+- 2、实现状态接口：不同的状态方法的实现逻辑也不一样（很重要）
+```
+public class MainTest {
+    public static void main(String[] args) {
+        CandyMachine candyMachine = new CandyMachine(6);
+        candyMachine.printState();
+        candyMachine.insertCoin();
+        candyMachine.printState();
+        candyMachine.turnCrank();
+        candyMachine.printState();
+        candyMachine.insertCoin();
+        candyMachine.printState();
+        candyMachine.turnCrank();
+        candyMachine.printState();
+    }
+}
+///////////////////////
+public class CandyMachine {
+    State soldOutState;
+    State onReadyState;
+    State hasCoin;
+    State soldState;
+    State winnerState;
+    private State state;
+    private int count = 0;
+    public CandyMachine(int count){
+        this.count = count;
+        soldOutState = new SoldOutState(this);
+        onReadyState = new OnReadyState(this);
+        hasCoin = new HasCoin(this);
+        soldState = new SoldState(this);
+        winnerState = new WinnerState(this);
+        if (count > 0){
+            state = onReadyState;
+        }else {
+            state = soldOutState;
+        }
+    }
+    void setState(State state){
+        this.state = state;
+    }
+    public void insertCoin(){
+        state.insertCoin();
+    }
+    public void returnCoin(){
+        state.returnCoin();
+    }
+    public void turnCrank(){
+        state.turnCrank();
+        state.dispense();
+    }
+    void releaseCandy(){
+        if (count > 0){
+            count = count - 1;
+            System.out.println("A candy rolling out!");
+        }
+    }
+    int getCount(){
+        return count;
+    }
+    public void printState(){
+        state.printState();
+    }
+}
+///////////////////////
+public interface State {
+    /**
+     * 插入硬币
+     */
+    public void insertCoin();
+
+    /**
+     * 退回硬币
+     */
+    public void returnCoin();
+
+    /**
+     * 转摇杆
+     */
+    public void turnCrank();
+
+    /**
+     * 发糖果
+     */
+    public void dispense();
+
+    /**
+     * 打印状态
+     */
+    public void printState();
+}
+///////////////////////
+public class OnReadyState implements State{
+    private CandyMachine candyMachine;
+    OnReadyState(CandyMachine candyMachine) {
+        this.candyMachine = candyMachine;
+    }
+
+    public void insertCoin() {
+        System.out.println("You have inserted a coin, next, please turn crank!");
+        candyMachine.setState(candyMachine.hasCoin);
+    }
+
+    public void returnCoin() {
+        System.out.println("You haven't inserted a coin yet!");
+    }
+
+    public void turnCrank() {
+        System.out.println("You turned, but you haven't inserted a coin yet!");
+    }
+
+    public void dispense() {
+
+    }
+
+    public void printState() {
+        System.out.println("***OnReadyState***");
+    }
+}
+```
