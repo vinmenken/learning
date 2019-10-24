@@ -105,18 +105,74 @@ public class TurkeyAdapter2 extends WildTurkey implements Duck {
 }
 ```
 
-#### 5、桥接模式：一个房子里面有客厅、房间、洗手间，创建房子对象需要给房子的客厅、房间、洗手间变量赋值（耦合度高），当房间需要装修，只能直接修改原来的房间类或者继承原来的房间类，如果将房间抽象出一个接口，就简单多了只需要实现这个接口就行，同样房子也可以抽象出抽象类（换房子也方便了）；一个接口，一个抽象类；；；；；需要重新写过，比如不合理
+#### 5、桥接模式：一个抽象类，一个接口；抽象类中引用了 接口；
+- 1、用电视遥控例子
+- 2、sony、lg的遥控器类实现接口，就有了统一的方法能够调用了，不再是一个厂商一种不同的方法
+- 3、根据不同的用户需求，来定义 不同的 控制类，这个控制类需要 继承 抽象类，抽象类重点就是引入了 厂商实现接口的对象
+- 4、这个时候控制类就能调用 接口 中的方法来实现不同 用户需求 
+###### 上面 继承抽象类的类 和 实现 接口的类 就是 桥墩，抽象类 引入 实现接口的对象 就是桥梁
+###### 其实就是 把 厂商 标准化为 接口 方法，再在 抽象类的实再类中 使用这个接口方法来 实现 定制的用户需求
 ```
-public abstract class AbstractHome {
-    Toilet toilet = null;
-    AbstractTvControls(Toilet toilet) {
-        this.toilet = toilet;
-    }
-    public abstract void 方法名();
+public interface Control { // 厂商 需要 实现的接口
+    /**
+     * 开
+     */
+    public void on();
+
+    /**
+     * 关
+     */
+    public void off();
+
+    /**
+     * 设置频道
+     * @param ch 频道
+     */
+    public void setChannel(int ch);
+    public void setVolume(int vol);
 }
-```
-```
-public interface Toilet {}
+///////////////////////////
+public abstract class AbstractTvControls { // 用户定制时 需要 继承 的抽象类，重点在于，创建对象时需要引入 厂商的实现类对象
+    Control control = null;
+    AbstractTvControls(Control control) {
+        this.control = control;
+    }
+
+    /**
+     *开关
+     */
+    public abstract void onOff(); //这些方法 再调用 接口 中的方法 来实现 用户需要求
+
+    /**
+     * 下一个频道
+     */
+    public abstract void nextChannel();  //这些方法 再调用 接口 中的方法 来实现 用户需要求
+
+    /**
+     * 前一个频道
+     */
+    public abstract void preChannel(); //这些方法 再调用 接口 中的方法 来实现 用户需要求
+}
+///////////////////////////
+public class MainTest {
+    public static void main(String[] args) {
+        TvControl mLGTvControl;
+        TvControl mSonyTvControl;
+        mSonyTvControl = new TvControl(new SonyControl());
+        mLGTvControl = new TvControl(new LGControl());
+        mLGTvControl.onOff();
+        mLGTvControl.nextChannel();
+        mLGTvControl.nextChannel();
+        mLGTvControl.preChannel();
+        mLGTvControl.onOff();
+        mSonyTvControl.onOff();
+        mSonyTvControl.preChannel();
+        mSonyTvControl.preChannel();
+        mSonyTvControl.preChannel();
+        mSonyTvControl.onOff();
+
+
+///////////////////////////
 ```
 
 #### 6、过滤模式
