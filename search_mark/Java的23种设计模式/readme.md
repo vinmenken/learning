@@ -736,4 +736,111 @@ public abstract class Game {
 }
 ```
 
-#### 19、访问者模式：
+#### 19、访问者模式：如：一个员工表，里面有员工的薪金、入职时间、名字等，年终我们需要计算年终奖;把计算年终奖用一个类实现；在迭代每个员工时调用这个算法类（访问者类）
+```
+public class MainTest {
+    public static void main(String[] args) {
+        Employees employees = new Employees();
+        employees.attach(new Employee("tom", 4500, 8, 1));
+        employees.attach(new Employee("Jerry", 6500, 10, 2));
+        employees.attach(new Employee("Jack", 9600, 12, 3));
+        employees.accept(new CompensationVisitor());
+    }
+}
+////////////////////////
+public abstract class Element { //这个就是需要员工类 实现的接口，用于 接受 访问者对象（算法类）
+    /**
+     * 接受新功能
+     * @param visitor 访问者
+     */
+    abstract public void accept(Visitor visitor);
+}
+////////////////////////
+public interface Visitor { //访问者类 需要 实现的接口，用于 具体计算实现 注意这个方法需要转入 Element 对象（员工对象）
+    /**
+     * 访问
+     * @param element 元素
+     */
+    abstract public void visit(Element element);
+}
+////////////////////////
+public class Employees {
+    private HashMap<String, Employee> employees;
+    public Employees(){
+        employees = new HashMap<String, Employee>();
+    }
+    public void attach(Employee employee){
+        employees.put(employee.getName(), employee);
+    }
+    public void Detach(Employee employee){
+        employees.remove(employee);
+    }
+    public Employee getEmployee(String name){
+        return employees.get(name);
+    }
+    public void accept(Visitor visitor){ //遍历 时需要传入 访问对象（算法对象）
+        for (Employee e: employees.values()){
+            e.accept(visitor);
+        }
+    }
+}
+////////////////////////
+public class CompensationVisitor implements Visitor { //访问类
+    public void visit(Element element) {
+        Employee employee = ((Employee)element);
+        System.out.println(employee.getName() + "'s Compensation is " +
+                (employee.getDegree() * employee.getVacationDays() * 10));
+    }
+}
+////////////////////////
+public class Employee extends Element{
+    private String name;
+    private float income;
+    private int vacationDays;
+    private int degree;
+
+    public Employee(String name, float income, int vacationDays, int degree) {
+        this.name = name;
+        this.income = income;
+        this.vacationDays = vacationDays;
+        this.degree = degree;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public float getIncome() {
+        return income;
+    }
+
+    public void setIncome(float income) {
+        this.income = income;
+    }
+
+    int getVacationDays() {
+        return vacationDays;
+    }
+
+    public void setVacationDays(int vacationDays) {
+        this.vacationDays = vacationDays;
+    }
+
+    int getDegree() {
+        return degree;
+    }
+
+    public void setDegree(int degree) {
+        this.degree = degree;
+    }
+
+    @Override
+    public void accept(Visitor visitor) { //这个就是员工类中 用于接收 算法对象的方法
+        visitor.visit(this);
+    }
+}
+```
